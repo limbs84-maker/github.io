@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나에게 맞는 치과 스타일 테스트</title>
+<style>
+  :root{
+    --mint:#7fe3d4; --mint-dark:#3fb9a8; --pink:#ffb6c9; --cream:#fff8f1;
+    --navy:#2c3e50; --muted:#8a93a6; --shadow:0 10px 30px rgba(63,185,168,0.18);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI','Pretendard','Malgun Gothic',sans-serif;}
+  body{
+    background:linear-gradient(160deg,#eafffa 0%, #fff8f1 60%, #ffeef2 100%);
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .card{
+    background:#ffffff; border-radius:28px; box-shadow:var(--shadow);
+    width:100%; max-width:560px; padding:36px 32px; position:relative; overflow:hidden;
+  }
+  .card::before{
+    content:'🦷'; position:absolute; top:-30px; right:-20px; font-size:140px; opacity:0.06; transform:rotate(15deg);
+  }
+  /* 시작 화면 */
+  #start-screen h1{
+    font-size:1.6rem; color:var(--navy); text-align:center; line-height:1.4; margin-bottom:10px;
+  }
+  #start-screen .emoji{ text-align:center; font-size:3.2rem; margin-bottom:10px; }
+  #start-screen p{ text-align:center; color:var(--muted); font-size:0.92rem; margin-bottom:26px; line-height:1.6;}
+  .start-btn{
+    display:block; width:100%; padding:16px; border:none; border-radius:16px;
+    background:linear-gradient(135deg,var(--mint),var(--mint-dark)); color:#fff;
+    font-size:1.05rem; font-weight:700; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease;
+    box-shadow:0 8px 18px rgba(63,185,168,0.35);
+  }
+  .start-btn:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(63,185,168,0.45); }
+
+  /* 진행바 */
+  .progress-wrap{ height:8px; background:#f0f2f5; border-radius:10px; overflow:hidden; margin-bottom:22px; }
+  .progress-bar{ height:100%; background:linear-gradient(90deg,var(--mint),var(--pink)); width:0%; transition:width .4s ease; border-radius:10px; }
+  .q-count{ text-align:right; font-size:0.78rem; color:var(--muted); margin-bottom:6px; }
+
+  /* 질문 화면 */
+  #quiz-screen{ display:none; }
+  .question-text{ font-size:1.18rem; color:var(--navy); font-weight:700; margin-bottom:22px; line-height:1.5; }
+  .options{ display:flex; flex-direction:column; gap:12px; }
+  .option-btn{
+    text-align:left; padding:15px 18px; border-radius:16px; border:2px solid #eef2f5;
+    background:#fafcfd; cursor:pointer; font-size:0.95rem; color:var(--navy);
+    transition:all .15s ease; line-height:1.4;
+  }
+  .option-btn:hover{ border-color:var(--mint); background:#f0fffb; transform:translateX(3px); }
+  .option-btn .icon{ margin-right:8px; }
+
+  /* 결과 화면 */
+  #result-screen{ display:none; text-align:center; }
+  .result-badge{
+    font-size:0.78rem; color:var(--mint-dark); font-weight:700; letter-spacing:1px;
+    background:#e8fbf6; display:inline-block; padding:6px 16px; border-radius:20px; margin-bottom:14px;
+  }
+  .result-emoji{ font-size:4rem; margin-bottom:6px; }
+  .result-title{ font-size:1.5rem; font-weight:800; color:var(--navy); margin-bottom:10px; }
+  .result-desc{ font-size:0.94rem; color:#5a6473; line-height:1.7; margin-bottom:18px; text-align:left; background:#fafcfd; padding:16px 18px; border-radius:14px; border:1px solid #f0f2f5;}
+  .result-reason{ font-size:0.86rem; color:var(--mint-dark); background:#eafffa; padding:14px 16px; border-radius:14px; margin-bottom:22px; text-align:left; line-height:1.6; border:1px dashed var(--mint);}
+  .result-reason b{ color:var(--navy); }
+  .tag-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:22px; }
+  .tag{ background:#ffeef2; color:#c45a78; font-size:0.78rem; padding:6px 12px; border-radius:20px; font-weight:600; }
+  .retry-btn{
+    width:100%; padding:14px; border:none; border-radius:14px; background:#fff; color:var(--mint-dark);
+    border:2px solid var(--mint); font-weight:700; cursor:pointer; font-size:0.95rem; transition:all .15s ease;
+  }
+  .retry-btn:hover{ background:var(--mint); color:#fff; }
+
+  footer-note{ display:block; text-align:center; color:#c2c8d4; font-size:0.7rem; margin-top:16px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- 시작 화면 -->
+  <div id="start-screen">
+    <div class="emoji">🦷✨</div>
+    <h1>나에게 맞는<br>치과 스타일은?</h1>
+    <p>6개의 질문에 답하면<br>당신의 성향에 딱 맞는 치과 진료 유형을<br>추천해드릴게요!</p>
+    <button class="start-btn" onclick="startQuiz()">테스트 시작하기 →</button>
+  </div>
+
+  <!-- 퀴즈 화면 -->
+  <div id="quiz-screen">
+    <div class="q-count" id="q-count">1 / 6</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="question-text" id="question-text"></div>
+    <div class="options" id="options-container"></div>
+  </div>
+
+  <!-- 결과 화면 -->
+  <div id="result-screen">
+    <div class="result-badge">YOUR DENTAL TYPE</div>
+    <div class="result-emoji" id="result-emoji"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="tag-row" id="result-tags"></div>
+    <div class="result-desc" id="result-desc"></div>
+    <div class="result-reason" id="result-reason"></div>
+    <button class="retry-btn" onclick="restartQuiz()">🔄 다시 테스트하기</button>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   [설계 개요]
+   - 5가지 결과 유형(A~E)은 "환자가 치과를 고를 때 중시하는 가치"를 축으로 설계
+     A: 디지털테크형 / B: 프리미엄심미형 / C: 임플란트명장형
+     D: 단골주치의형 / E: 가성비실속형
+   - 각 질문의 선택지는 1개 이상의 유형에 점수를 분배 (가중치 2 = 주성향, 1 = 보조성향)
+   - 6개 질문을 모두 답하면 점수를 합산, 최고점 유형을 결과로 제시
+   - 동점 시 먼저 정의된 유형(배열 순서) 우선 적용 → tie-break 규칙 고정
+   ========================================================= */
+
+const questions = [
+  {
+    text: "Q1. 치과에 갔을 때 가장 먼저 눈에 들어오는 건?",
+    options: [
+      { label: "🖥️ 디지털 구강스캐너, 3D 장비 같은 첨단 기기", score: {A:2, C:1} },
+      { label: "💎 깔끔하고 화사한 인테리어, 세련된 분위기", score: {B:2} },
+      { label: "😊 의사·직원분들의 친절한 미소와 편안한 응대", score: {D:2} },
+      { label: "💰 입구에 붙어있는 가격표나 이벤트 안내", score: {E:2} },
+    ]
+  },
+  {
+    text: "Q2. 치료를 결정할 때 나는...",
+    options: [
+      { label: "🔬 최신 기술/장비로 정확하게 진단하는 게 우선", score: {A:2} },
+      { label: "✨ 치료 후 자연스럽고 예쁜 결과가 가장 중요", score: {B:2} },
+      { label: "🛡️ 한번 하면 오래 쓰는 튼튼한 치료를 선택", score: {C:2} },
+      { label: "🤝 믹고 있는 원장님 의견을 따르는 게 마음 편함", score: {D:2} },
+    ]
+  },
+  {
+    text: "Q3. 임플란트가 필요하다고 하면, 가장 궁금한 점은?",
+    options: [
+      { label: "어떤 디지털 가이드 시스템으로 정밀하게 식립하는지", score: {A:2, C:1} },
+      { label: "심미적으로 자연치아처럼 보이는지", score: {B:2} },
+      { label: "10년, 20년 이상 얼마나 튼튼하게 버티는지", score: {C:2} },
+      { label: "전체 비용과 분할결제 같은 합리적 옵션", score: {E:2} },
+    ]
+  },
+  {
+    text: "Q4. 치과를 정할 때 검색하는 키워드는?",
+    options: [
+      { label: "'AI 진단' '디지털 덴티스트리' '최신 장비'", score: {A:2} },
+      { label: "'라미네이트' '투명교정' '연예인 시술'", score: {B:2} },
+      { label: "'임플란트 명의' '오래된 노하우' '전문병원'", score: {C:2} },
+      { label: "'동네 치과 추천' '단골' '친절한 곳'", score: {D:2} },
+    ]
+  },
+  {
+    text: "Q5. 평소 나의 소비 패턴과 가장 비슷한 것은?",
+    options: [
+      { label: "신기술/신제품이 나오면 가장 먼저 써본다", score: {A:2} },
+      { label: "조금 비싸도 만족도 높은 프리미엄을 선택한다", score: {B:2} },
+      { label: "한 번 살 때 좋은 걸 사서 오래 쓴다", score: {C:2} },
+      { label: "신뢰할 수 있는 단골 가게를 꾸준히 간다", score: {D:2} },
+      { label: "가격 비교는 필수, 합리적 소비가 최우선", score: {E:2} },
+    ]
+  },
+  {
+    text: "Q6. 치과 진료가 끝난 후 가장 만족스러운 순간은?",
+    options: [
+      { label: "정밀한 장비 덕분에 통증 없이 빨리 끝났을 때", score: {A:2} },
+      { label: "거울 보고 '와 예쁘다' 싶을 때", score: {B:2} },
+      { label: "오래 써도 끄떡없겠다는 안심이 들 때", score: {C:2} },
+      { label: "원장님이 다음 관리 일정까지 챙겨줄 때", score: {D:2} },
+      { label: "예상보다 비용이 적게 나왔을 때", score: {E:2} },
+    ]
+  }
+];
+
+const resultTypes = {
+  A: {
+    emoji: "🤖",
+    title: "디지털테크 얼리어답터형",
+    tags: ["#디지털덴티스트리", "#정밀진단", "#신기술"],
+    desc: "당신은 '경험'보다 '데이터와 기술'을 믿는 타입! 구강스캐너, 3D 프린팅, AI 진단처럼 최신 디지털 장비를 적극 도입한 치과에서 안정감을 느껴요. 정밀하고 빠른 진료, 그리고 눈에 보이는 기술력에 끌리는 당신에겐 디지털 워크플로우가 잘 갖춰진 치과가 베스트 매치입니다.",
+    reason: "최신 장비·정밀 진단·기술 키워드를 선택한 빈도가 가장 높았어요. <b>'얼마나 정확하고 효율적인가'</b>를 최우선 가치로 두는 패턴이 뚜렷하게 나타났습니다."
+  },
+  B: {
+    emoji: "💎",
+    title: "프리미엄 심미형",
+    tags: ["#라미네이트", "#투명교정", "#심미치료"],
+    desc: "치료의 '기능'만큼 '아름다움'도 중요한 당신! 자연스럽고 예쁜 결과, 세련된 공간, 트렌디한 시술에 마음이 가는 타입이에요. 라미네이트, 투명교정처럼 심미 중심 치료를 전문으로 하는 프리미엄 치과와 찰떡 호흡을 이룰 거예요.",
+    reason: "예쁜 결과·인테리어·심미 시술 관련 선택지에 점수가 집중됐어요. <b>'결과가 보기에도 좋은가'</b>를 가장 중요한 기준으로 삼는 성향이 확인됐습니다."
+  },
+  C: {
+    emoji: "🛡️",
+    title: "임플란트 명장 신뢰형",
+    tags: ["#임플란트", "#내구성", "#전문성"],
+    desc: "한번 치료하면 오래, 튼튼하게! 당신은 화려함보다 '검증된 실력'과 '내구성'을 중시하는 타입이에요. 오랜 경력과 노하우를 가진 임플란트 전문 치과, 그리고 견고한 시술 결과에 신뢰를 느낍니다.",
+    reason: "내구성·전문성·오래 쓰는 치료를 선택한 비중이 가장 컸어요. <b>'얼마나 단단하고 믿을 수 있는가'</b>가 당신의 핵심 의사결정 기준이에요."
+  },
+  D: {
+    emoji: "🤝",
+    title: "동네 단골 주치의형",
+    tags: ["#친절", "#편안함", "#정기관리"],
+    desc: "기술이나 가격보다 '사람'이 먼저인 당신! 편안한 분위기, 친절한 응대, 꾸준히 믹고 지내는 단골 치과를 선호해요. 정기검진처럼 관계 기반의 꾸준한 관리를 잘 챙겨주는 동네 치과가 가장 잘 맞습니다.",
+    reason: "친절함·신뢰·관계 중심 선택지에 점수가 몰렸어요. <b>'마음이 편한가, 믹을 수 있는가'</b>를 가장 중요하게 보는 성향이 나타났습니다."
+  },
+  E: {
+    emoji: "💰",
+    title: "가성비 실속형",
+    tags: ["#합리적가격", "#효율", "#실속"],
+    desc: "꼼꼼한 비교와 합리적 소비가 강점인 당신! 같은 효과라면 더 합리적인 비용으로, 효율적으로 치료받는 걸 선호해요. 투명한 가격 정책과 다양한 옵션을 제공하는 치과와 가장 잘 맞아요.",
+    reason: "가격·합리성·실속 관련 선택지가 가장 많이 선택됐어요. <b>'얼마나 합리적인 비용인가'</b>가 당신의 1순위 기준으로 나타났습니다."
+  }
+};
+
+let currentQ = 0;
+let scores = {A:0, B:0, C:0, D:0, E:0};
+
+function startQuiz(){
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  currentQ = 0;
+  scores = {A:0,B:0,C:0,D:0,E:0};
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = questions[currentQ];
+  document.getElementById('q-count').textContent = `${currentQ+1} / ${questions.length}`;
+  document.getElementById('progress-bar').style.width = `${((currentQ)/questions.length)*100}%`;
+  document.getElementById('question-text').textContent = q.text;
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.label;
+    btn.onclick = () => selectOption(opt.score);
+    container.appendChild(btn);
+  });
+}
+
+function selectOption(scoreObj){
+  for (const key in scoreObj){
+    scores[key] += scoreObj[key];
+  }
+  currentQ++;
+  if (currentQ < questions.length){
+    renderQuestion();
+  } else {
+    document.getElementById('progress-bar').style.width = '100%';
+    setTimeout(showResult, 250);
+  }
+}
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  // 최고점 유형 산출 (동점이면 정의 순서 A>B>C>D>E 우선)
+  const order = ['A','B','C','D','E'];
+  let best = order[0];
+  order.forEach(k => { if (scores[k] > scores[best]) best = k; });
+
+  const r = resultTypes[best];
+  document.getElementById('result-emoji').textContent = r.emoji;
+  document.getElementById('result-title').textContent = r.title;
+  document.getElementById('result-desc').textContent = r.desc;
+  document.getElementById('result-reason').innerHTML = r.reason;
+
+  const tagRow = document.getElementById('result-tags');
+  tagRow.innerHTML = '';
+  r.tags.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = t;
+    tagRow.appendChild(span);
+  });
+}
+
+function restartQuiz(){
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
