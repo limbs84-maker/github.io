@@ -83,13 +83,13 @@
   <div id="start-screen">
     <div class="emoji">🦷✨</div>
     <h1>나에게 맞는<br>치과 스타일은?</h1>
-    <p>6개의 질문에 답하면<br>당신의 성향에 딱 맞는 치과 진료 유형을<br>추천해드릴게요!</p>
+    <p>9개의 질문에 답하면<br>당신의 성향에 딱 맞는 치과 진료 유형을<br>추천해드릴게요!</p>
     <button class="start-btn" onclick="startQuiz()">테스트 시작하기 →</button>
   </div>
 
   <!-- 퀴즈 화면 -->
   <div id="quiz-screen">
-    <div class="q-count" id="q-count">1 / 6</div>
+    <div class="q-count" id="q-count">1 / 9</div>
     <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
     <div class="question-text" id="question-text"></div>
     <div class="options" id="options-container"></div>
@@ -115,7 +115,7 @@
      A: 디지털테크형 / B: 프리미엄심미형 / C: 임플란트명장형
      D: 단골주치의형 / E: 가성비실속형
    - 각 질문의 선택지는 1개 이상의 유형에 점수를 분배 (가중치 2 = 주성향, 1 = 보조성향)
-   - 6개 질문을 모두 답하면 점수를 합산, 최고점 유형을 결과로 제시
+   - 9개 질문을 모두 답하면 점수를 합산, 최고점 유형을 결과로 제시
    - 동점 시 먼저 정의된 유형(배열 순서) 우선 적용 → tie-break 규칙 고정
    ========================================================= */
 
@@ -174,6 +174,36 @@ const questions = [
       { label: "오래 써도 끄떡없겠다는 안심이 들 때", score: {C:2} },
       { label: "원장님이 다음 관리 일정까지 챙겨줄 때", score: {D:2} },
       { label: "예상보다 비용이 적게 나왔을 때", score: {E:2} },
+    ]
+  },
+  {
+    text: "Q7. 친구가 치과를 추천해달라고 하면 가장 먼저 묻는 말은?",
+    options: [
+      { label: "거기 디지털 장비는 최신인지?", score: {A:2} },
+      { label: "결과 사진(비포&애프터) 보여줄 수 있는지?", score: {B:2} },
+      { label: "임플란트나 큰 시술도 잘하는 곳인지?", score: {C:2} },
+      { label: "원장님이 오래 한 곳인지, 분위기 편한지?", score: {D:2} },
+      { label: "가격은 합리적인 편인지?", score: {E:2} },
+    ]
+  },
+  {
+    text: "Q8. 치료 전 상담에서 가장 듣고 싶은 설명은?",
+    options: [
+      { label: "정밀 검사 데이터와 시뮬레이션 결과", score: {A:2} },
+      { label: "치료 후 미적으로 어떻게 달라지는지", score: {B:2} },
+      { label: "이 치료가 얼마나 오래, 안전하게 유지되는지", score: {C:2} },
+      { label: "내 상황을 충분히 들어주고 공감해주는 상담", score: {D:2} },
+      { label: "단계별 비용과 견적 옵션", score: {E:2} },
+    ]
+  },
+  {
+    text: "Q9. 치과 후기를 볼 때 가장 눈에 들어오는 키워드는?",
+    options: [
+      { label: "'무통증' '디지털 가이드' '정밀진단'", score: {A:2, C:1} },
+      { label: "'자연스러움' '만족도 최고' '연예인 시술'", score: {B:2} },
+      { label: "'10년째 튼튼' '재시술 없음'", score: {C:2} },
+      { label: "'단골' '편안한 분위기' '친절 응대'", score: {D:2} },
+      { label: "'가성비 갑' '이벤트가' '합리적 비용'", score: {E:2} },
     ]
   }
 ];
